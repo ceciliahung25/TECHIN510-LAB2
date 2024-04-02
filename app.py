@@ -1,50 +1,58 @@
 import streamlit as st
 import pandas as pd
-import plotly.
+import plotly.express as px
 
 st.set_page_config(
-    page_title="Penguins Explorer",
-    page_icon="🐧",
+    page_title="Penguins Explorer", 
+    page_icon="🐧", 
     layout="centered",
 )
 
 st.title("🐧 Penguins Explorer")
 
+st.markdown("""
+## Observations
+- The Adelie species has the highest bill length.
+
+""")
+
+st.divider()
+
 df = pd.read_csv("https://raw.githubusercontent.com/mcnakhaee/palmerpenguins/master/palmerpenguins/data/penguins.csv")
 
-#Input filter option
-bill_length_slider = st.slider(
-    "Bill Length (mm)",
-    min(df["bill_length_mm"]),
-    max(df["bill_length_mm"]),
-)
+with st.sidebar:
+    # Input filter options
+    bill_length_slider = st.slider(
+        "Bill Length (mm)",
+        min(df["bill_length_mm"]),
+        max(df["bill_length_mm"]),
+    )
+    species_filter = st.selectbox(
+        "Species",
+        df["species"].unique(),
+        index=None
+    )
+    islands_filter = st.multiselect("Island", df["island"].unique())
 
-df = df[df["bill_length_mm"] > bill_length_slider]
-
-species_filter = st.selectbox(
-    "Species",
-    df["species"].unique(),
-    index = None
-)
-st.write(species_filter)
-
-#Filter Data
+# Filter data
+if islands_filter:
+    df = df[df["island"].isin(islands_filter)]
 if species_filter:
     df = df[df["species"] == species_filter]
+df = df[df["bill_length_mm"] > bill_length_slider]
 
-islands_filter = st.multiselect,("Island", df["Island", df["island"]])
+with st.expander("RAW Data"):
+    st.write(df)
 
-if islands_filter:
-    df=df[df["species"] == species_filter]
+fig = px.histogram(
+    df, 
+    x="bill_length_mm"
+)
+st.plotly_chart(fig)
 
-
-
-
-
-
-
-# st.selectbox("Species",["Adelie","Chinstrap"])
-
-# st.selectbox("Species", df["species"], unique())
-# st.multiselect("Species", df["species"], unique())
-# st.write(df)
+fig2 = px.scatter(
+    df, 
+    x="bill_length_mm", 
+    y="bill_depth_mm"
+)
+st.plotly_chart(fig2)
